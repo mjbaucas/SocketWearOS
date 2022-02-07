@@ -59,22 +59,40 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
                     long start = SystemClock.elapsedRealtime();
 
                     try {
-                        TCP_SERVER_HOST = binding.hostname.getText().toString();
-                        TCP_SERVER_PORT = Integer.parseInt(binding.port.getText().toString());
+                        //TCP_SERVER_HOST = binding.hostname.getText().toString();
+                        //TCP_SERVER_PORT = Integer.parseInt(binding.port.getText().toString());
+
+                        TCP_SERVER_HOST = "192.168.2.132";
+                        TCP_SERVER_PORT = 5000;
 
                         if (TCP_SERVER_HOST != null && TCP_SERVER_PORT != -1) {
-                            long current = SystemClock.elapsedRealtime();
-                            while (current - start < TIME){
-                                current = SystemClock.elapsedRealtime();
-                                COUNTER++;
-                                runTCPClient();
-                            }
+                            Thread thread = new Thread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    try  {
+                                        long current = SystemClock.elapsedRealtime();
+                                        while (current - start < TIME){
+                                            current = SystemClock.elapsedRealtime();
+                                            COUNTER++;
+                                            runTCPClient();
+                                        }
 
-                            String tempString = "Average Time: " + AVERAGE_TIME / COUNTER;
-                            binding.averageValue.setText(tempString);
+                                        runOnUiThread(new Runnable() {
+                                            @Override
+                                            public void run() {
+                                                String tempString = "Average Time: 222 " + AVERAGE_TIME / COUNTER;
+                                                binding.averageValue.setText(tempString);
 
-                            binding.connectButton.setText("Disconnect");
-                            CONNECTED = true;
+                                                binding.connectButton.setText("Disconnect");
+                                                CONNECTED = true;
+                                            }
+                                        });
+                                    } catch (Exception e) {
+                                        e.printStackTrace();
+                                    }
+                                }
+                            });
+                            thread.start();
                         } else {
                             finish();
                         }
@@ -108,7 +126,12 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
             s.close();
         } catch (Exception e) {
             String tempString = "Error: " + e.toString();
-            binding.averageValue.setText(tempString);
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    binding.averageValue.setText(tempString);
+                }
+            });
             e.printStackTrace();
         }
     }
